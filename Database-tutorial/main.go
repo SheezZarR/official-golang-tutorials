@@ -65,6 +65,17 @@ func albumById(id int64) (Album, error) {
 }
 
 
+func addAlbum(alb Album) (int64, error) {
+	var id int64 = 0
+	
+	if err := db.QueryRow(context.Background(), "INSERT INTO album (title, artist, price) VALUES ($1, $2, $3) RETURNING id", alb.Title, alb.Artist, alb.Price).Scan(&id); err != nil {
+		return 0, fmt.Errorf("addAlbum: %v", err)
+	}
+
+	return id, nil
+}
+
+
 func main() {
 	fmt.Println("Hello databases!")
 	var err error
@@ -95,4 +106,14 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Printf("Album found: %v\n", album)
+
+	albId, err := addAlbum(Album{
+		Title:  "The Modern Sound of Betty Carter",
+		Artist: "Betty Carter",
+		Price:  49.99,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Newly added album id: %v\n", albId)
 }	
