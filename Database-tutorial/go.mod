@@ -1,4 +1,4 @@
-module database/tutorial
+module databases/tutorial
 
 go 1.19
 
