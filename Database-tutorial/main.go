@@ -48,6 +48,23 @@ func albumsByArtist(name string) ([]Album, error) {
 
 }
 
+
+func albumById(id int64) (Album, error) {
+	var alb Album
+
+	row := db.QueryRow(context.Background(), "SELECT * FROM album WHERE id = $1", id)
+	if err := row.Scan(&alb.ID, &alb.Title, &alb.Artist, &alb.Price); err != nil {
+		if err == pgx.ErrNoRows {
+			return alb, fmt.Errorf("albumById %d: no such album", id)
+		}
+
+		return alb, fmt.Errorf("albumById %d: %v", id, err)
+	}
+
+	return alb, nil
+}
+
+
 func main() {
 	fmt.Println("Hello databases!")
 	var err error
@@ -66,9 +83,16 @@ func main() {
 	}
 	fmt.Println("Connection successful")
 	fmt.Printf("Checking db connection: %p\n", db)
+	
 	albums, err := albumsByArtist("John Coltrane")
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("Albums found: %v\n", albums)
+
+	album, err := albumById(2)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Album found: %v\n", album)
 }	
